@@ -1,0 +1,39 @@
+<?xml version="1.0"?>
+<launch>
+    <!-- Vehicle initial pose -->
+    <arg name="x" default="180.0"/>
+    <arg name="y" default="-104.0"/>
+    <arg name="z" default="0.11"/>
+    <arg name="yaw" default="0.0"/>
+
+    <arg name="record_topics" default="/ackermann_cmd /ground_truth/state "/>
+
+
+    <!-- Create the world. -->
+    <include file="$(find gazebo_ros)/launch/empty_world.launch">
+      <arg name="paused" value="true"/>  <!-- Paused to wait for all nodes to initialize -->
+      <arg name="use_sim_time" value="true"/>
+      <arg name="gui" value="true"/>
+      <arg name="headless" value="false"/>
+      <arg name="world_name" value="$(find gem_gazebo)/worlds/race_track.world"/>
+    </include>
+
+
+    <!-- Spawn GEM car -->
+    <include file="$(find gem_gazebo)/launch/spawn_gem.launch">
+        <arg name="x" default="$(arg x)"/>
+        <arg name="y" default="$(arg y)"/>
+        <arg name="z" default="$(arg z)"/>
+        <arg name="yaw" default="$(arg yaw)"/>
+    </include>
+
+    <!-- Spawn GEM vision for lane detection -->
+    <node name="gem_vision" pkg="gem_vision" type="gem_vision.py" output="screen"/>
+
+
+  <group if="$(eval arg('record_topics')!='')">
+    <!-- ROS Bag record -->
+    <node name="$(anon record)" pkg="rosbag" type="record" output="screen"
+        args="--tcpnodelay -o $(env HOME)/gem_replay/bags/rerun $(arg record_topics)"/>
+  </group>
+</launch>
