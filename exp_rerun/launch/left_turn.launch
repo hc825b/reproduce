@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <launch>
     <!-- Gazebo simulation options -->
-    <arg name="gui" default="true"/>
+    <arg name="gui" default="false"/>
     <arg name="paused" default="true" doc="Default paused to wait for all nodes to initialize"/>
     <arg name="profile" default="default" doc="Physics profile in the world"/>
     <arg name="seed" default="1" doc="Random seed for Gazebo"/>
@@ -15,8 +15,11 @@
     <arg name="yaw" default="0.0"/>
 
     <!-- ROS Bag record options -->
-    <arg name="record_topics" default="/ackermann_cmd /ground_truth/state /gem/front_single_camera/front_single_camera/image_raw"/>
+    <arg name="record_topics" default="/ackermann_cmd /ground_truth/state /front_single_camera/image_raw"/>
     <arg name="duration" default="30s"/>
+    <arg name="buffsize" default="256"/>
+    <arg name="bag_dir" default="/tmp/"/>
+    <arg name="bag_name_prefix" default="rerun"/>
 
 
     <!-- Create the world. -->
@@ -44,6 +47,6 @@
   <group if="$(eval arg('record_topics')!='')">
     <!-- ROS Bag record -->
     <node name="$(anon record)" pkg="rosbag" type="record" output="screen" required="true"
-        args="--duration $(arg duration) --tcpnodelay -o $(env HOME)/gem_replay/bags/rerun $(arg record_topics)"/>
+        args=" --buffsize $(arg buffsize) --duration $(arg duration) --tcpnodelay -o $(arg bag_dir)/$(arg bag_name_prefix) $(arg record_topics)"/>
   </group>
 </launch>
